@@ -2,7 +2,6 @@ package shift
 
 import (
 	"errors"
-	"flag"
 	"os"
 	"strconv"
 	"subs/utils"
@@ -40,12 +39,11 @@ func Do(args ...string) error {
 	if err != nil {
 		return err
 	}
-	for _, entry := range srt {
-		if entry.Start >= startAfter {
-			entry.Start += shiftAmount
-			entry.End += shiftAmount
+	for i := range srt {
+		if srt[i].Start >= startAfter {
+			srt[i].Start += shiftAmount
+			srt[i].End += shiftAmount
 		}
 	}
-
-	return nil
+	return os.WriteFile(output, []byte(srt.String()), 0777)
 }

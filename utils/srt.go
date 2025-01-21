@@ -32,7 +32,7 @@ func (srt Srt) String() string {
 	return result
 }
 
-var indexRe = regexp.MustCompile(`^\d+r$`)
+var indexRe = regexp.MustCompile(`^\d+$`)
 
 func ParseSrt(bs []byte) (Srt, error) {
 	var result Srt
@@ -43,7 +43,7 @@ func ParseSrt(bs []byte) (Srt, error) {
 		if len(seg) < 3 { // last newline could be missing
 			return nil, fmt.Errorf("found malformed section beginning on line %d", begin)
 		}
-		if !indexRe.MatchString(seg[0]) {
+		if !indexRe.MatchString(strings.TrimSpace(seg[0])) {
 			return nil, fmt.Errorf("expected to find index on line %d, found: %s", begin, seg[0])
 		}
 		beginDur, endDur, err := parseSrtTimes(seg[1])
@@ -81,7 +81,7 @@ func parseSrtTime(s string) (time.Duration, error) {
 	}
 	millis := time.Duration(0)
 	if len(segments) == 2 { // just in case someone leaves off the milliseconds, don't fail to parse
-		if i, err := strconv.Atoi(segments[2]); err != nil {
+		if i, err := strconv.Atoi(strings.TrimSpace(segments[1])); err != nil {
 			return result, err
 		} else {
 			millis = time.Duration(i)
@@ -94,7 +94,7 @@ func parseSrtTime(s string) (time.Duration, error) {
 	}
 	slices.Reverse(timeUnits) // reversing it this way makes the bigger times optional e.g. 00:43:27 == 43:27
 	for t, unit := range Zip(timeUnits, []time.Duration{time.Second, time.Minute, time.Hour}) {
-		if tAsInt, err := strconv.Atoi(t); err != nil {
+		if tAsInt, err := strconv.Atoi(strings.TrimSpace(t)); err != nil {
 			return result, err
 		} else {
 			result += time.Duration(tAsInt) * unit
@@ -119,5 +119,5 @@ func formatSrtTimeStr(hours, minutes, seconds, millis int) string {
 	mString := LeftPad(fmt.Sprint(minutes), 2, '0')
 	sString := LeftPad(fmt.Sprint(seconds), 2, '0')
 	msString := LeftPad(fmt.Sprint(millis), 3, '0')
-	return fmt.Sprintf("%d:%d:%d,%d", hString, mString, sString, msString)
+	return fmt.Sprintf("%s:%s:%s,%s", hString, mString, sString, msString)
 }

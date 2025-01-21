@@ -12,10 +12,12 @@ func UntilNextEmptyLine(s string) iter.Seq2[int, []string] {
 		previous := 0
 		for i, line := range lines {
 			if len(strings.TrimSpace(line)) == 0 {
-				if !yield(previous+1, lines[previous:i]) {
-					return
+				if previous != i {
+					if !yield(previous+1, lines[previous:i]) {
+						return
+					}
 				}
-				previous = i
+				previous = i + 1
 			}
 		}
 		yield(previous, lines[previous:])
